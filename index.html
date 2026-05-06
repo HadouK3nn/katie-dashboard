@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Katie Camplen — Meta Ads Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  /* ── AIzaSyAbO9xbAPweQQakvWD8_UNcm1e-UGHPhdI ── */
+  :root {
+    --accent: #1877F2;
+    --accent-light: #E8F0FE;
+    --green: #1D9E75;
+    --green-light: #E1F5EE;
+    --red: #E24B4A;
+    --red-light: #FCEBEB;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+    --bg: #F7F8FA;
+    --surface: #FFFFFF;
+    --border: rgba(0,0,0,0.08);
+    --text: #1A1A2E;
+    --text-secondary: #6B7280;
+    --text-tertiary: #9CA3AF;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .topbar-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .topbar-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .period-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .refresh-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+
+  .refresh-btn:hover { background: var(--bg); color: var(--text); }
+  .refresh-btn.loading { opacity: 0.6; pointer-events: none; }
+
+  /* ── MAIN LAYOUT ── */
+  .main { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 20px;
+    margin-bottom: 1.5rem;
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .status-bar.loading .status-dot { background: var(--amber); }
+  .status-bar.error .status-dot { background: var(--red); animation: none; }
+
+  /* ── METRIC CARDS ── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    transition: transform 0.2s;
+  }
+
+  .metric-card:hover { transform: translateY(-1px); }
+
+  .metric-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .metric-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    font-weight: 400;
+  }
+
+  .metric-value {
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: -0.5px;
+  }
+
+  .metric-sub {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+  }
+
+  /* ── CHARTS ROW ── */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 1rem;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 1rem;
+    background: var(--bg);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    width: fit-content;
+  }
+
+  .tab {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 400;
+  }
+
+  .tab.active {
+    background: var(--surface);
+    color: var(--text);
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  /* ── TABLES ── */
+  .table-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  th {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg); }
+
+  .mono { font-family: 'DM Mono', monospace; font-size: 12px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .badge-green { background: var(--green-light); color: var(--green); }
+  .badge-blue { background: var(--accent-light); color: var(--accent); }
+  .badge-red { background: var(--red-light); color: var(--red); }
+  .badge-amber { background: var(--amber-light); color: var(--amber); }
+
+  /* ── TWO COL BOTTOM ── */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── WEEKLY TABLE ── */
+  .week-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .week-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--accent);
+    transition: width 0.5s ease;
+  }
+
+  /* ── LOADING SKELETON ── */
+  .skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    padding: 2rem 0 1rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .main { padding: 1rem; }
+    .charts-row { grid-template-columns: 1fr; }
+    .bottom-row { grid-template-columns: 1fr; }
+    .topbar { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo-mark">X</div>
+    <div>
+      <div class="topbar-title">Katie Camplen</div>
+      <div class="topbar-sub">Meta Ads Performance</div>
+    </div>
+  </div>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <span class="period-tag" id="periodTag">Loading...</span>
+    <button class="refresh-btn" id="refreshBtn" onclick="loadAllData()">
+      ↻ Refresh
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- STATUS -->
+  <div class="status-bar loading" id="statusBar">
+    <div class="status-dot"></div>
+    <span id="statusText">Connecting to Google Sheets...</span>
+  </div>
+
+  <!-- METRICS -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-icon" style="background:#E8F0FE;">💰</div>
+      <div class="metric-label">Total spend</div>
+      <div class="metric-value" id="mSpend">—</div>
+      <div class="metric-sub" id="mSpendSub">USD</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon" style="background:#E1F5EE;">🎯</div>
+      <div class="metric-label">Total leads</div>
+      <div class="metric-value" id="mLeads">—</div>
+      <div class="metric-sub" id="mLeadsSub">Lead objective</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon" style="background:#FAEEDA;">📊</div>
+      <div class="metric-label">Cost per lead</div>
+      <div class="metric-value" id="mCPL">—</div>
+      <div class="metric-sub">Avg across period</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon" style="background:#F3E8FF;">👁️</div>
+      <div class="metric-label">Impressions</div>
+      <div class="metric-value" id="mImpr">—</div>
+      <div class="metric-sub" id="mReach">Reach: —</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon" style="background:#FEE2E2;">🖱️</div>
+      <div class="metric-label">Total clicks</div>
+      <div class="metric-value" id="mClicks">—</div>
+      <div class="metric-sub" id="mCPC">Avg CPC: —</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon" style="background:#E1F5EE;">📈</div>
+      <div class="metric-label">Avg CTR</div>
+      <div class="metric-value" id="mCTR">—</div>
+      <div class="metric-sub">Click-through rate</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon" style="background:#FEF3C7;">📡</div>
+      <div class="metric-label">Avg CPM</div>
+      <div class="metric-value" id="mCPM">—</div>
+      <div class="metric-sub">Per 1,000 impressions</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon" style="background:#E8F0FE;">🔁</div>
+      <div class="metric-label">Avg frequency</div>
+      <div class="metric-value" id="mFreq">—</div>
+      <div class="metric-sub">Per person</div>
+    </div>
+  </div>
+
+  <!-- MAIN CHART + SUMMARY -->
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-title">Daily spend & leads</div>
+      <div class="legend">
+        <span><span class="legend-dot" style="background:#1877F2;"></span>Spend (USD)</span>
+        <span><span class="legend-dot" style="background:#1D9E75;"></span>Leads</span>
+      </div>
+      <div style="position:relative; width:100%; height:260px;">
+        <canvas id="spendLeadsChart" role="img" aria-label="Daily spend and leads chart">Daily spend and leads data.</canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Best days by CPL</div>
+      <div id="bestDaysTable">
+        <div style="color:var(--text-tertiary); font-size:13px; padding:1rem 0;">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTR + CPC CHARTS -->
+  <div class="bottom-row">
+    <div class="card">
+      <div class="card-title">Daily CTR trend (%)</div>
+      <div style="position:relative; width:100%; height:200px;">
+        <canvas id="ctrChart" role="img" aria-label="Daily CTR trend">Daily CTR trend.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Daily CPC trend (USD)</div>
+      <div style="position:relative; width:100%; height:200px;">
+        <canvas id="cpcChart" role="img" aria-label="Daily CPC trend">Daily CPC trend.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEEKLY + AD SET -->
+  <div class="bottom-row">
+    <div class="card">
+      <div class="card-title">Weekly summary</div>
+      <div id="weeklyTable">
+        <div style="color:var(--text-tertiary); font-size:13px; padding:1rem 0;">Loading...</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Ad set breakdown</div>
+      <div class="table-wrap" id="adsetTable">
+        <div style="color:var(--text-tertiary); font-size:13px; padding:1rem 0;">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AD LEVEL TABLE -->
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+      <div class="card-title" style="margin-bottom:0;">Ad creative performance</div>
+      <div class="tabs">
+        <button class="tab active" onclick="filterAds('all', this)">All</button>
+        <button class="tab" onclick="filterAds('best', this)">Best CPL</button>
+        <button class="tab" onclick="filterAds('worst', this)">Worst CPL</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ad name</th>
+            <th>Campaign</th>
+            <th>Spend</th>
+            <th>Impr.</th>
+            <th>Clicks</th>
+            <th>CTR</th>
+            <th>Leads</th>
+            <th>CPL</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="adsTableBody">
+          <tr><td colspan="9" style="color:var(--text-tertiary); text-align:center; padding:2rem;">Loading ad data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">
+    Powered by Xavvi Digital · Data via Meta Ads API → Google Sheets · Auto-refreshes daily
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// CONFIGURATION - Replace these with your actual values
+// ============================================================
+const SHEET_ID = "1-AWXF4cB_dzA0kKjc047OMGbE0JprVRarUuf3Ma7NKg";
+const API_KEY = "AIzaSyAbO9xbAPweQQakvWD8_UNcm1e-UGHPhdI";
+const SHEETS = { campaigns: "Campaigns", adsets: "Ad Sets", ads: "Ads" };
+
+// ============================================================
+// GLOBAL STATE
+// ============================================================
+let allData = { campaigns: [], adsets: [], ads: [] };
+let charts = {};
+let adsFiltered = [];
+
+// ============================================================
+// LOAD ALL DATA ON START
+// ============================================================
+async function loadAllData() {
+  setStatus("loading", "Fetching latest data from Google Sheets...");
+  document.getElementById("refreshBtn").classList.add("loading");
+
+  try {
+    // Fetch all three sheets in parallel
+    const [campaigns, adsets, ads] = await Promise.all([
+      fetchSheet(SHEETS.campaigns),
+      fetchSheet(SHEETS.adsets),
+      fetchSheet(SHEETS.ads)
+    ]);
+
+    allData = { campaigns, adsets, ads };
+
+    // Update all dashboard sections
+    updateMetrics(campaigns);
+    updateSpendLeadsChart(campaigns);
+    updateCTRChart(campaigns);
+    updateCPCChart(campaigns);
+    updateWeeklySummary(campaigns);
+    updateAdSetTable(adsets);
+    updateAdsTable(ads);
+    updateBestDays(campaigns);
+    updatePeriodTag(campaigns);
+
+    setStatus("live", "Live · Last updated " + new Date().toLocaleTimeString());
+
+  } catch (err) {
+    setStatus("error", "Error loading data: " + err.message);
+    console.error(err);
+  }
+
+  document.getElementById("refreshBtn").classList.remove("loading");
+}
+
+// ============================================================
+// FETCH A SINGLE SHEET TAB
+// ============================================================
+async function fetchSheet(sheetName) {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(sheetName)}?key=${API_KEY}`;
+  const res = await fetch(url);
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error?.message || "Failed to fetch sheet: " + sheetName);
+  }
+
+  const json = await res.json();
+  const rows = json.values || [];
+
+  if (rows.length < 2) return [];
+
+  // Convert rows to objects using first row as headers
+  const headers = rows[0];
+  return rows.slice(1).map(row => {
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = row[i] || ""; });
+    return obj;
+  });
+}
+
+// ============================================================
+// UPDATE METRIC CARDS
+// ============================================================
+function updateMetrics(data) {
+  // Aggregate totals across all rows
+  let totalSpend = 0, totalLeads = 0, totalImpr = 0, totalClicks = 0;
+  let totalReach = 0, ctrSum = 0, cpmSum = 0, freqSum = 0, cpcSum = 0;
+  let count = data.length;
+
+  data.forEach(row => {
+    totalSpend += parseFloat(row["Spend"] || 0);
+    totalLeads += parseFloat(row["Results"] || 0);
+    totalImpr += parseInt(row["Impressions"] || 0);
+    totalClicks += parseInt(row["Clicks"] || 0);
+    totalReach += parseInt(row["Reach"] || 0);
+    ctrSum += parseFloat(row["CTR (%)"] || 0);
+    cpmSum += parseFloat(row["CPM"] || 0);
+    freqSum += parseFloat(row["Frequency"] || 0);
+    cpcSum += parseFloat(row["CPC"] || 0);
+  });
+
+  const avgCTR = count > 0 ? (ctrSum / count) : 0;
+  const avgCPM = count > 0 ? (cpmSum / count) : 0;
+  const avgFreq = count > 0 ? (freqSum / count) : 0;
+  const avgCPC = count > 0 ? (cpcSum / count) : 0;
+  const cpl = totalLeads > 0 ? (totalSpend / totalLeads) : 0;
+
+  setText("mSpend", "$" + totalSpend.toFixed(2));
+  setText("mLeads", Math.round(totalLeads).toLocaleString());
+  setText("mCPL", "$" + cpl.toFixed(2));
+  setText("mImpr", totalImpr.toLocaleString());
+  setText("mReach", "Reach: " + totalReach.toLocaleString());
+  setText("mClicks", totalClicks.toLocaleString());
+  setText("mCPC", "Avg CPC: $" + avgCPC.toFixed(2));
+  setText("mCTR", avgCTR.toFixed(2) + "%");
+  setText("mCPM", "$" + avgCPM.toFixed(2));
+  setText("mFreq", avgFreq.toFixed(2) + "x");
+}
+
+// ============================================================
+// UPDATE SPEND + LEADS CHART
+// ============================================================
+function updateSpendLeadsChart(data) {
+  const sorted = [...data].sort((a, b) => new Date(a["Date"]) - new Date(b["Date"]));
+  const labels = sorted.map(r => formatDate(r["Date"]));
+  const spend = sorted.map(r => parseFloat(r["Spend"] || 0));
+  const leads = sorted.map(r => parseFloat(r["Results"] || 0));
+
+  if (charts.spendLeads) charts.spendLeads.destroy();
+
+  charts.spendLeads = new Chart(document.getElementById("spendLeadsChart"), {
+    data: {
+      labels,
+      datasets: [
+        {
+          type: "bar",
+          label: "Spend (USD)",
+          data: spend,
+          backgroundColor: "#1877F2",
+          borderRadius: 4,
+          yAxisID: "ySpend",
+          order: 2
+        },
+        {
+          type: "line",
+          label: "Leads",
+          data: leads,
+          borderColor: "#1D9E75",
+          backgroundColor: "rgba(29,158,117,0.1)",
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: "#1D9E75",
+          tension: 0.3,
+          fill: false,
+          yAxisID: "yLeads",
+          order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: "#9CA3AF", font: { size: 10 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 15 }, grid: { color: "rgba(0,0,0,0.05)" } },
+        ySpend: { position: "left", ticks: { color: "#9CA3AF", font: { size: 11 }, callback: v => "$" + v.toFixed(0) }, grid: { color: "rgba(0,0,0,0.05)" } },
+        yLeads: { position: "right", ticks: { color: "#9CA3AF", font: { size: 11 }, stepSize: 1 }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// UPDATE CTR CHART
+// ============================================================
+function updateCTRChart(data) {
+  const sorted = [...data].sort((a, b) => new Date(a["Date"]) - new Date(b["Date"]));
+  const labels = sorted.map(r => formatDate(r["Date"]));
+  const ctr = sorted.map(r => parseFloat(r["CTR (%)"] || 0));
+
+  if (charts.ctr) charts.ctr.destroy();
+
+  charts.ctr = new Chart(document.getElementById("ctrChart"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "CTR (%)",
+        data: ctr,
+        borderColor: "#534AB7",
+        backgroundColor: "rgba(83,74,183,0.08)",
+        borderWidth: 2,
+        pointRadius: 2,
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: "#9CA3AF", font: { size: 10 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 8 }, grid: { color: "rgba(0,0,0,0.05)" } },
+        y: { ticks: { color: "#9CA3AF", font: { size: 11 }, callback: v => v.toFixed(1) + "%" }, grid: { color: "rgba(0,0,0,0.05)" } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// UPDATE CPC CHART
+// ============================================================
+function updateCPCChart(data) {
+  const sorted = [...data].sort((a, b) => new Date(a["Date"]) - new Date(b["Date"]));
+  const labels = sorted.map(r => formatDate(r["Date"]));
+  const cpc = sorted.map(r => parseFloat(r["CPC"] || 0));
+
+  if (charts.cpc) charts.cpc.destroy();
+
+  charts.cpc = new Chart(document.getElementById("cpcChart"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "CPC (USD)",
+        data: cpc,
+        borderColor: "#D85A30",
+        backgroundColor: "rgba(216,90,48,0.08)",
+        borderWidth: 2,
+        pointRadius: 2,
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: "#9CA3AF", font: { size: 10 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 8 }, grid: { color: "rgba(0,0,0,0.05)" } },
+        y: { ticks: { color: "#9CA3AF", font: { size: 11 }, callback: v => "$" + v.toFixed(2) }, grid: { color: "rgba(0,0,0,0.05)" } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// UPDATE WEEKLY SUMMARY
+// ============================================================
+function updateWeeklySummary(data) {
+  // Group data by week number
+  const weeks = {};
+  data.forEach(row => {
+    const d = new Date(row["Date"]);
+    const weekNum = getWeekOfMonth(d);
+    const key = "Week " + weekNum;
+    if (!weeks[key]) weeks[key] = { spend: 0, leads: 0, clicks: 0, impr: 0 };
+    weeks[key].spend += parseFloat(row["Spend"] || 0);
+    weeks[key].leads += parseFloat(row["Results"] || 0);
+    weeks[key].clicks += parseInt(row["Clicks"] || 0);
+    weeks[key].impr += parseInt(row["Impressions"] || 0);
+  });
+
+  const maxSpend = Math.max(...Object.values(weeks).map(w => w.spend));
+
+  let html = '<table><thead><tr><th>Week</th><th>Spend</th><th>Leads</th><th>CPL</th><th>CTR</th></tr></thead><tbody>';
+
+  Object.entries(weeks).forEach(([week, w]) => {
+    const cpl = w.leads > 0 ? (w.spend / w.leads).toFixed(2) : "N/A";
+    const ctr = w.impr > 0 ? ((w.clicks / w.impr) * 100).toFixed(2) : "0.00";
+    const barWidth = maxSpend > 0 ? Math.round((w.spend / maxSpend) * 80) : 0;
+
+    html += `<tr>
+      <td><span style="font-weight:500;">${week}</span></td>
+      <td class="mono">
+        <div class="week-bar-wrap">
+          <div class="week-bar" style="width:${barWidth}px;"></div>
+          $${w.spend.toFixed(2)}
+        </div>
+      </td>
+      <td class="mono">${Math.round(w.leads)}</td>
+      <td class="mono">${cpl !== "N/A" ? "$" + cpl : "N/A"}</td>
+      <td class="mono">${ctr}%</td>
+    </tr>`;
+  });
+
+  html += "</tbody></table>";
+  document.getElementById("weeklyTable").innerHTML = html;
+}
+
+// ============================================================
+// UPDATE AD SET TABLE
+// ============================================================
+function updateAdSetTable(data) {
+  // Aggregate by ad set name
+  const adsets = {};
+  data.forEach(row => {
+    const name = row["Ad Set Name"] || "Unknown";
+    if (!adsets[name]) adsets[name] = { spend: 0, leads: 0, clicks: 0, impr: 0, reach: 0 };
+    adsets[name].spend += parseFloat(row["Spend"] || 0);
+    adsets[name].leads += parseFloat(row["Results"] || 0);
+    adsets[name].clicks += parseInt(row["Clicks"] || 0);
+    adsets[name].impr += parseInt(row["Impressions"] || 0);
+    adsets[name].reach += parseInt(row["Reach"] || 0);
+  });
+
+  let html = '<table><thead><tr><th>Ad set</th><th>Spend</th><th>Leads</th><th>CPL</th><th>CTR</th></tr></thead><tbody>';
+
+  Object.entries(adsets).sort((a, b) => b[1].spend - a[1].spend).forEach(([name, d]) => {
+    const cpl = d.leads > 0 ? "$" + (d.spend / d.leads).toFixed(2) : "N/A";
+    const ctr = d.impr > 0 ? ((d.clicks / d.impr) * 100).toFixed(2) + "%" : "0%";
+    const shortName = name.length > 25 ? name.substring(0, 25) + "..." : name;
+
+    html += `<tr>
+      <td title="${name}" style="max-width:160px;">${shortName}</td>
+      <td class="mono">$${d.spend.toFixed(2)}</td>
+      <td class="mono">${Math.round(d.leads)}</td>
+      <td class="mono">${cpl}</td>
+      <td class="mono">${ctr}</td>
+    </tr>`;
+  });
+
+  html += "</tbody></table>";
+  document.getElementById("adsetTable").innerHTML = html;
+}
+
+// ============================================================
+// UPDATE ADS TABLE
+// ============================================================
+function updateAdsTable(data, filter = "all") {
+  // Aggregate by ad name
+  const ads = {};
+  data.forEach(row => {
+    const name = row["Ad Name"] || "Unknown";
+    const campaign = row["Campaign Name"] || "N/A";
+    if (!ads[name]) ads[name] = { spend: 0, leads: 0, clicks: 0, impr: 0, campaign, status: row["Status"] || "N/A" };
+    ads[name].spend += parseFloat(row["Spend"] || 0);
+    ads[name].leads += parseFloat(row["Results"] || 0);
+    ads[name].clicks += parseInt(row["Clicks"] || 0);
+    ads[name].impr += parseInt(row["Impressions"] || 0);
+  });
+
+  let entries = Object.entries(ads).map(([name, d]) => ({
+    name,
+    ...d,
+    cpl: d.leads > 0 ? d.spend / d.leads : 99999,
+    ctr: d.impr > 0 ? (d.clicks / d.impr) * 100 : 0
+  }));
+
+  if (filter === "best") entries = entries.sort((a, b) => a.cpl - b.cpl).slice(0, 5);
+  else if (filter === "worst") entries = entries.sort((a, b) => b.cpl - a.cpl).slice(0, 5);
+  else entries = entries.sort((a, b) => b.spend - a.spend);
+
+  adsFiltered = entries;
+
+  let html = "";
+  entries.forEach(ad => {
+    const cplDisplay = ad.leads > 0 ? "$" + ad.cpl.toFixed(2) : "N/A";
+    const cplColor = ad.cpl < 2 ? "color:#1D9E75; font-weight:500;" : ad.cpl > 5 ? "color:#E24B4A; font-weight:500;" : "";
+    const statusBadge = ad.status === "ACTIVE"
+      ? '<span class="badge badge-green">Active</span>'
+      : '<span class="badge badge-amber">' + ad.status + '</span>';
+    const shortName = ad.name.length > 30 ? ad.name.substring(0, 30) + "..." : ad.name;
+    const shortCampaign = ad.campaign.length > 25 ? ad.campaign.substring(0, 25) + "..." : ad.campaign;
+
+    html += `<tr>
+      <td title="${ad.name}" style="max-width:200px; font-weight:500;">${shortName}</td>
+      <td title="${ad.campaign}" style="max-width:150px; color:var(--text-secondary); font-size:12px;">${shortCampaign}</td>
+      <td class="mono">$${ad.spend.toFixed(2)}</td>
+      <td class="mono">${ad.impr.toLocaleString()}</td>
+      <td class="mono">${ad.clicks.toLocaleString()}</td>
+      <td class="mono">${ad.ctr.toFixed(2)}%</td>
+      <td class="mono">${Math.round(ad.leads)}</td>
+      <td class="mono" style="${cplColor}">${cplDisplay}</td>
+      <td>${statusBadge}</td>
+    </tr>`;
+  });
+
+  document.getElementById("adsTableBody").innerHTML = html || '<tr><td colspan="9" style="text-align:center; color:var(--text-tertiary); padding:2rem;">No data found</td></tr>';
+}
+
+// ============================================================
+// UPDATE BEST DAYS PANEL
+// ============================================================
+function updateBestDays(data) {
+  const withLeads = data.filter(r => parseFloat(r["Results"] || 0) > 0);
+  const sorted = withLeads.map(r => ({
+    date: r["Date"],
+    spend: parseFloat(r["Spend"] || 0),
+    leads: parseFloat(r["Results"] || 0),
+    cpl: parseFloat(r["Spend"] || 0) / parseFloat(r["Results"] || 1)
+  })).sort((a, b) => a.cpl - b.cpl);
+
+  const best = sorted.slice(0, 5);
+
+  let html = '<table><thead><tr><th>Date</th><th>Leads</th><th>CPL</th><th>Spend</th></tr></thead><tbody>';
+  best.forEach(d => {
+    html += `<tr>
+      <td class="mono" style="font-size:12px;">${formatDate(d.date)}</td>
+      <td class="mono">${Math.round(d.leads)}</td>
+      <td class="mono" style="color:#1D9E75; font-weight:500;">$${d.cpl.toFixed(2)}</td>
+      <td class="mono">$${d.spend.toFixed(2)}</td>
+    </tr>`;
+  });
+  html += "</tbody></table>";
+
+  document.getElementById("bestDaysTable").innerHTML = html;
+}
+
+// ============================================================
+// FILTER ADS TABLE
+// ============================================================
+function filterAds(filter, btn) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  btn.classList.add("active");
+  updateAdsTable(allData.ads, filter);
+}
+
+// ============================================================
+// UPDATE PERIOD TAG
+// ============================================================
+function updatePeriodTag(data) {
+  if (data.length === 0) return;
+  const sorted = [...data].sort((a, b) => new Date(a["Date"]) - new Date(b["Date"]));
+  const first = sorted[0]["Date"];
+  const last = sorted[sorted.length - 1]["Date"];
+  document.getElementById("periodTag").textContent = formatDate(first) + " — " + formatDate(last);
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function getWeekOfMonth(date) {
+  const day = date.getDate();
+  if (day <= 7) return 1;
+  if (day <= 14) return 2;
+  if (day <= 21) return 3;
+  if (day <= 28) return 4;
+  return 5;
+}
+
+function setStatus(type, msg) {
+  const bar = document.getElementById("statusBar");
+  const text = document.getElementById("statusText");
+  bar.className = "status-bar " + type;
+  text.textContent = msg;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+loadAllData();
+</script>
+</body>
+</html>
