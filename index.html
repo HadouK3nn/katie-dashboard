@@ -33,7 +33,8 @@ body { font-family: 'Instrument Sans', sans-serif; background: var(--bg); color:
 body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events:none; z-index:0; opacity:0.4; }
 
 /* TOPBAR */
-.topbar { position:sticky; top:0; z-index:100; background:rgba(10,10,15,0.85); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:0 2rem; height:64px; display:flex; align-items:center; justify-content:space-between; }
+.topbar { position:sticky; top:0; z-index:100; background:rgba(10,10,15,0.85); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:0 1.5rem; height:64px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.topbar-right { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; }
 .brand { display:flex; align-items:center; gap:14px; }
 .logo { width:36px; height:36px; background:var(--accent); border-radius:10px; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:700; font-size:16px; color:white; box-shadow:0 0 20px rgba(108,99,255,0.4); }
 .brand-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:600; color:var(--text); letter-spacing:-0.3px; }
@@ -249,7 +250,7 @@ body::before { content:''; position:fixed; inset:0; background-image:url("data:i
   background: var(--surface2);
   border: 1px solid var(--border);
   color: var(--text2);
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s;
@@ -270,8 +271,8 @@ body::before { content:''; position:fixed; inset:0; background-image:url("data:i
   border: 1px solid var(--border2);
   border-radius: 6px;
   color: var(--text);
-  padding: 5px 10px;
-  width: 130px;
+  padding: 4px 8px;
+  width: 118px;
   cursor: pointer;
   transition: border-color 0.15s;
 }
@@ -316,23 +317,6 @@ body::before { content:''; position:fixed; inset:0; background-image:url("data:i
     </div>
   </div>
   <div class="topbar-right">
-    <button class="refresh-btn" id="refreshBtn" onclick="loadAllData()">↻ Refresh</button>
-  </div>
-</div>
-
-<!-- STATUS -->
-<div class="status-wrap">
-  <div class="status-bar loading" id="statusBar">
-    <div class="status-dot"></div>
-    <span id="statusText">Connecting to data source...</span>
-  </div>
-</div>
-
-
-<!-- DATE RANGE BAR -->
-<div class="date-bar">
-  <div class="date-bar-inner">
-    <div class="date-bar-label">Range</div>
     <div class="preset-btns">
       <button class="preset-btn" onclick="applyPreset('7d', this)">7D</button>
       <button class="preset-btn" onclick="applyPreset('30d', this)">30D</button>
@@ -342,12 +326,21 @@ body::before { content:''; position:fixed; inset:0; background-image:url("data:i
     </div>
     <div class="date-divider"></div>
     <div class="custom-dates">
-      <div class="date-bar-label">Custom</div>
       <input type="date" class="date-input" id="dateFrom" />
-      <span class="date-sep">&rarr;</span>
+      <span class="date-sep">&#8594;</span>
       <input type="date" class="date-input" id="dateTo" />
       <button class="apply-btn" onclick="applyCustomDate()">Apply</button>
     </div>
+    <div class="date-divider"></div>
+    <button class="refresh-btn" id="refreshBtn" onclick="loadAllData()">&#8635; Refresh</button>
+  </div>
+</div>
+
+<!-- STATUS -->
+<div class="status-wrap">
+  <div class="status-bar loading" id="statusBar">
+    <div class="status-dot"></div>
+    <span id="statusText">Connecting to data source...</span>
   </div>
 </div>
 
@@ -738,24 +731,25 @@ function renderCPC(d) {
 function renderWeekly(d) {
   if(!d.length){ document.getElementById("weeklyTable").innerHTML='<div class="empty-state">No data for this period</div>'; return; }
   const weeks={};
-  // Group by year + month + week number to avoid per-day rows
   d.forEach(r=>{
     const dt = new Date(r.Date);
     const yr = dt.getFullYear();
-    const mo = dt.getMonth(); // 0-indexed
-    const wn = weekNum(dt);
-    // Unique key per week: year-month-weeknum
-    const key = yr + "-" + mo + "-" + wn;
-    if(!weeks[key]) {
-      const moName = dt.toLocaleDateString("en-US",{month:"short"});
-      weeks[key] = {spend:0, leads:0, clicks:0, impr:0, label: moName+" W"+wn, sortKey: yr*10000 + mo*100 + wn};
+    const mo = dt.getMonth();
+    // Week number within month based on day of month
+    const day = dt.getDate();
+    const wn = day<=7 ? 1 : day<=14 ? 2 : day<=21 ? 3 : day<=28 ? 4 : 5;
+    // Build a truly unique key: year + month + weeknum combined as single number
+    const sortKey = yr * 100000 + mo * 100 + wn;
+    const moName = dt.toLocaleDateString("en-US",{month:"short"});
+    const label = moName + " W" + wn;
+    if(!weeks[sortKey]) {
+      weeks[sortKey] = {spend:0, leads:0, clicks:0, impr:0, label, sortKey};
     }
-    weeks[key].spend += p(r.Spend);
-    weeks[key].leads += p(r.Results);
-    weeks[key].clicks += pi(r.Clicks);
-    weeks[key].impr += pi(r.Impressions);
+    weeks[sortKey].spend += p(r.Spend);
+    weeks[sortKey].leads += p(r.Results);
+    weeks[sortKey].clicks += pi(r.Clicks);
+    weeks[sortKey].impr += pi(r.Impressions);
   });
-  // Sort weeks chronologically
   const sorted = Object.values(weeks).sort((a,b) => a.sortKey - b.sortKey);
   const maxSpend = Math.max(...sorted.map(w=>w.spend));
   let html="";
