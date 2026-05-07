@@ -738,12 +738,30 @@ function renderCPC(d) {
 function renderWeekly(d) {
   if(!d.length){ document.getElementById("weeklyTable").innerHTML='<div class="empty-state">No data for this period</div>'; return; }
   const weeks={};
-  d.forEach(r=>{ const dt=new Date(r.Date); const wk=dt.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}).slice(0,6)+" W"+weekNum(dt); if(!weeks[wk]) weeks[wk]={spend:0,leads:0,clicks:0,impr:0,label:wkLabel(dt)}; weeks[wk].spend+=p(r.Spend); weeks[wk].leads+=p(r.Results); weeks[wk].clicks+=pi(r.Clicks); weeks[wk].impr+=pi(r.Impressions); });
-  const maxSpend=Math.max(...Object.values(weeks).map(w=>w.spend));
+  // Group by year + month + week number to avoid per-day rows
+  d.forEach(r=>{
+    const dt = new Date(r.Date);
+    const yr = dt.getFullYear();
+    const mo = dt.getMonth(); // 0-indexed
+    const wn = weekNum(dt);
+    // Unique key per week: year-month-weeknum
+    const key = yr + "-" + mo + "-" + wn;
+    if(!weeks[key]) {
+      const moName = dt.toLocaleDateString("en-US",{month:"short"});
+      weeks[key] = {spend:0, leads:0, clicks:0, impr:0, label: moName+" W"+wn, sortKey: yr*10000 + mo*100 + wn};
+    }
+    weeks[key].spend += p(r.Spend);
+    weeks[key].leads += p(r.Results);
+    weeks[key].clicks += pi(r.Clicks);
+    weeks[key].impr += pi(r.Impressions);
+  });
+  // Sort weeks chronologically
+  const sorted = Object.values(weeks).sort((a,b) => a.sortKey - b.sortKey);
+  const maxSpend = Math.max(...sorted.map(w=>w.spend));
   let html="";
-  Object.values(weeks).forEach(w=>{
-    const cpl=w.leads>0?"$"+(w.spend/w.leads).toFixed(2):"N/A";
-    const pct=maxSpend>0?Math.round((w.spend/maxSpend)*100):0;
+  sorted.forEach(w=>{
+    const cpl = w.leads>0 ? "$"+(w.spend/w.leads).toFixed(2) : "N/A";
+    const pct = maxSpend>0 ? Math.round((w.spend/maxSpend)*100) : 0;
     html+=`<div class="week-row"><div class="week-label">${w.label}</div><div class="week-bar-bg"><div class="week-bar-fill" style="width:${pct}%;"></div></div><div class="week-stats">$${w.spend.toFixed(2)} · ${Math.round(w.leads)}L · ${cpl}</div></div>`;
   });
   document.getElementById("weeklyTable").innerHTML=html;
