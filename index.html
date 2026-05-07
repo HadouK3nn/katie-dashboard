@@ -212,13 +212,95 @@ body::before { content:''; position:fixed; inset:0; background-image:url("data:i
 .fade-3 { animation-delay:0.15s; opacity:0; }
 .fade-4 { animation-delay:0.2s; opacity:0; }
 
+/* DATE BAR */
+.date-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 2rem;
+  position: sticky;
+  top: 64px;
+  z-index: 99;
+  backdrop-filter: blur(20px);
+}
+
+.date-bar-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.date-bar-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.preset-btns { display:flex; gap:4px; flex-wrap:wrap; }
+
+.preset-btn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.preset-btn:hover { color:var(--text); border-color:var(--border2); }
+.preset-btn.active { background:var(--accent-dim); color:var(--accent); border-color:rgba(108,99,255,0.35); }
+
+.date-divider { width:1px; height:24px; background:var(--border2); flex-shrink:0; }
+
+.custom-dates { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
+.date-input {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 5px 10px;
+  width: 130px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.date-input:focus { outline:none; border-color:var(--accent); }
+.date-input::-webkit-calendar-picker-indicator { filter:invert(0.5); cursor:pointer; }
+
+.date-sep { font-size:11px; color:var(--text3); }
+
+.apply-btn {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 12px;
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.apply-btn:hover { opacity:0.85; }
+
 @media(max-width:900px) {
   .metrics-grid { grid-template-columns:repeat(2,1fr); }
   .row-2-1,.row-2 { grid-template-columns:1fr; }
   .main { padding:1rem; }
-  .topbar { padding:0 1rem; flex-wrap:wrap; height:auto; padding:12px 1rem; gap:8px; }
-  .date-controls { flex-wrap:wrap; }
-  .preset-btns { flex-wrap:wrap; }
+  .topbar { padding:0 1rem; }
+  .date-bar { padding:10px 1rem; top:64px; }
 }
 </style>
 </head>
@@ -234,25 +316,6 @@ body::before { content:''; position:fixed; inset:0; background-image:url("data:i
     </div>
   </div>
   <div class="topbar-right">
-
-    <!-- DATE RANGE CONTROLS -->
-    <div class="date-controls">
-      <div class="preset-btns">
-        <button class="preset-btn" onclick="applyPreset('7d', this)">7D</button>
-        <button class="preset-btn" onclick="applyPreset('30d', this)">30D</button>
-        <button class="preset-btn active" onclick="applyPreset('lastMonth', this)">Last month</button>
-        <button class="preset-btn" onclick="applyPreset('90d', this)">90D</button>
-        <button class="preset-btn" onclick="applyPreset('all', this)">All time</button>
-      </div>
-      <div class="date-divider"></div>
-      <div class="custom-dates">
-        <input type="date" class="date-input" id="dateFrom" />
-        <span class="date-sep">→</span>
-        <input type="date" class="date-input" id="dateTo" />
-        <button class="apply-btn" onclick="applyCustomDate()">Apply</button>
-      </div>
-    </div>
-
     <button class="refresh-btn" id="refreshBtn" onclick="loadAllData()">↻ Refresh</button>
   </div>
 </div>
@@ -262,6 +325,29 @@ body::before { content:''; position:fixed; inset:0; background-image:url("data:i
   <div class="status-bar loading" id="statusBar">
     <div class="status-dot"></div>
     <span id="statusText">Connecting to data source...</span>
+  </div>
+</div>
+
+
+<!-- DATE RANGE BAR -->
+<div class="date-bar">
+  <div class="date-bar-inner">
+    <div class="date-bar-label">Range</div>
+    <div class="preset-btns">
+      <button class="preset-btn" onclick="applyPreset('7d', this)">7D</button>
+      <button class="preset-btn" onclick="applyPreset('30d', this)">30D</button>
+      <button class="preset-btn active" onclick="applyPreset('lastMonth', this)">Last month</button>
+      <button class="preset-btn" onclick="applyPreset('90d', this)">90D</button>
+      <button class="preset-btn" onclick="applyPreset('all', this)">All time</button>
+    </div>
+    <div class="date-divider"></div>
+    <div class="custom-dates">
+      <div class="date-bar-label">Custom</div>
+      <input type="date" class="date-input" id="dateFrom" />
+      <span class="date-sep">&rarr;</span>
+      <input type="date" class="date-input" id="dateTo" />
+      <button class="apply-btn" onclick="applyCustomDate()">Apply</button>
+    </div>
   </div>
 </div>
 
