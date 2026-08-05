@@ -8,115 +8,51 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root {
-  --bg: #0A0A0F;
-  --surface: #111118;
-  --surface2: #18181F;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --text: #F0EEF8;
-  --text2: #8B8A99;
-  --text3: #4A4A5A;
-  --accent: #6C63FF;
-  --accent-dim: rgba(108,99,255,0.15);
-  --green: #00D4A0;
-  --green-dim: rgba(0,212,160,0.12);
-  --red: #FF5C5C;
-  --red-dim: rgba(255,92,92,0.12);
-  --amber: #FFB547;
-  --amber-dim: rgba(255,181,71,0.12);
-  --pink: #FF6B9D;
-  --r: 14px;
-  --r-sm: 8px;
+--bg: #0A0A0F;
+--surface: #111118;
+--surface2: #18181F;
+--border: rgba(255,255,255,0.07);
+--border2: rgba(255,255,255,0.12);
+--text: #F0EEF8;
+--text2: #8B8A99;
+--text3: #4A4A5A;
+--accent: #6C63FF;
+--accent-dim: rgba(108,99,255,0.15);
+--green: #00D4A0;
+--green-dim: rgba(0,212,160,0.12);
+--red: #FF5C5C;
+--red-dim: rgba(255,92,92,0.12);
+--amber: #FFB547;
+--amber-dim: rgba(255,181,71,0.12);
+--pink: #FF6B9D;
+--r: 14px;
+--r-sm: 8px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Instrument Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events:none; z-index:0; opacity:0.4; }
-
-/* TOPBAR */
 .topbar { position:sticky; top:0; z-index:100; background:rgba(10,10,15,0.85); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:0 1.5rem; min-height:64px; height:auto; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
 .topbar-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:8px 0; }
 .brand { display:flex; align-items:center; gap:14px; }
 .logo { width:36px; height:36px; background:var(--accent); border-radius:10px; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:700; font-size:16px; color:white; box-shadow:0 0 20px rgba(108,99,255,0.4); }
 .brand-name { font-family:'Syne',sans-serif; font-size:15px; font-weight:600; color:var(--text); letter-spacing:-0.3px; }
 .brand-sub { font-size:12px; color:var(--text2); margin-top:1px; }
-
-/* DATE RANGE CONTROLS */
-.date-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: var(--r-sm);
-  padding: 6px 10px;
-}
-
-.preset-btns {
-  display: flex;
-  gap: 2px;
-}
-
-.preset-btn {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  background: none;
-  border: none;
-  color: var(--text2);
-  padding: 4px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-
+.date-controls { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--r-sm); padding: 6px 10px; }
+.preset-btns { display: flex; gap: 2px; }
+.preset-btn { font-family: 'IBM Plex Mono', monospace; font-size: 11px; background: none; border: none; color: var(--text2); padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
 .preset-btn:hover { color: var(--text); background: var(--surface2); }
 .preset-btn.active { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(108,99,255,0.25); }
-
 .date-divider { width: 1px; height: 20px; background: var(--border2); }
-
-.custom-dates {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.date-input {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  padding: 4px 8px;
-  width: 120px;
-  cursor: pointer;
-  transition: border-color 0.15s;
-}
-
+.custom-dates { display: flex; align-items: center; gap: 6px; }
+.date-input { font-family: 'IBM Plex Mono', monospace; font-size: 11px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 4px 8px; width: 120px; cursor: pointer; transition: border-color 0.15s; }
 .date-input:focus { outline: none; border-color: var(--accent); }
 .date-input::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
-
 .date-sep { font-size: 11px; color: var(--text3); }
-
-.apply-btn {
-  font-family: 'Instrument Sans', sans-serif;
-  font-size: 12px;
-  background: var(--accent);
-  border: none;
-  border-radius: 6px;
-  padding: 5px 12px;
-  color: white;
-  cursor: pointer;
-  transition: opacity 0.15s;
-  white-space: nowrap;
-}
+.apply-btn { font-family: 'Instrument Sans', sans-serif; font-size: 12px; background: var(--accent); border: none; border-radius: 6px; padding: 5px 12px; color: white; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
 .apply-btn:hover { opacity: 0.85; }
-
 .refresh-btn { font-family:'Instrument Sans',sans-serif; font-size:12px; background:var(--surface2); border:1px solid var(--border2); border-radius:var(--r-sm); padding:7px 14px; color:var(--text2); cursor:pointer; display:flex; align-items:center; gap:6px; transition:all 0.2s; }
 .refresh-btn:hover { border-color:var(--accent); color:var(--text); }
 .refresh-btn.loading { opacity:0.5; pointer-events:none; }
-
-/* STATUS */
 .status-wrap { padding:0 2rem; margin-top:1.5rem; }
 .status-bar { display:inline-flex; align-items:center; gap:8px; font-size:12px; font-family:'IBM Plex Mono',monospace; color:var(--text2); background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:6px 14px; }
 .status-dot { width:7px; height:7px; border-radius:50%; background:var(--green); }
@@ -124,28 +60,10 @@ body::before { content:''; position:fixed; inset:0; background-image:url("data:i
 .status-bar.error .status-dot { background:var(--red); animation:none; }
 .status-bar.live .status-dot { animation:blink 3s infinite; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-/* MAIN */
 .main { padding:1.5rem 2rem 3rem; max-width:1280px; margin:0 auto; position:relative; z-index:1; }
 .section-label { font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:500; letter-spacing:0.12em; color:var(--text3); text-transform:uppercase; margin-bottom:12px; margin-top:2rem; }
-
-/* ACTIVE RANGE BADGE */
-.active-range {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  color: var(--text2);
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 4px 12px;
-  margin-bottom: 1.5rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
+.active-range { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text2); background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 4px 12px; margin-bottom: 1.5rem; display: inline-flex; align-items: center; gap: 8px; }
 .active-range span { color: var(--accent); }
-
-/* METRICS */
 .metrics-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); border-radius:var(--r); overflow:hidden; margin-bottom:1.5rem; border:1px solid var(--border); }
 .metric-card { background:var(--surface); padding:1.5rem; transition:background 0.2s; position:relative; overflow:hidden; }
 .metric-card:hover { background:var(--surface2); }
@@ -162,8 +80,6 @@ body::before { content:''; position:fixed; inset:0; background-image:url("data:i
 .badge-red { background:var(--red-dim); color:var(--red); }
 .badge-amber { background:var(--amber-dim); color:var(--amber); }
 .badge-accent { background:var(--accent-dim); color:var(--accent); }
-
-/* CARDS */
 .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:1.5rem; }
 .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; }
 .card-title { font-family:'Syne',sans-serif; font-size:13px; font-weight:600; color:var(--text); letter-spacing:-0.2px; }
@@ -173,240 +89,223 @@ body::before { content:''; position:fixed; inset:0; background-image:url("data:i
 .legend-sq { width:8px; height:8px; border-radius:2px; }
 .row-2-1 { display:grid; grid-template-columns:2fr 1fr; gap:12px; margin-bottom:12px; }
 .row-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
-
-/* TABLES */
 .tbl { width:100%; border-collapse:collapse; font-size:12px; }
 .tbl th { font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:500; color:var(--text3); text-align:left; padding:0 8px 10px; border-bottom:1px solid var(--border); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap; }
 .tbl td { padding:10px 8px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
 .tbl tr:last-child td { border-bottom:none; }
 .tbl tr:hover td { background:var(--surface2); }
 .mono { font-family:'IBM Plex Mono',monospace; font-size:12px; }
-
-/* WEEKLY */
 .week-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
 .week-row:last-child { border-bottom:none; }
 .week-label { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text2); width:60px; flex-shrink:0; }
 .week-bar-bg { flex:1; height:6px; background:var(--surface2); border-radius:3px; overflow:hidden; }
 .week-bar-fill { height:100%; border-radius:3px; background:var(--accent); transition:width 0.8s cubic-bezier(0.16,1,0.3,1); }
 .week-stats { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text2); text-align:right; min-width:110px; }
-
-/* TABS */
 .tab-row { display:flex; gap:2px; background:var(--bg); border:1px solid var(--border); border-radius:var(--r-sm); padding:3px; }
 .tab { font-family:'Instrument Sans',sans-serif; font-size:12px; padding:5px 14px; border-radius:6px; border:none; background:none; color:var(--text2); cursor:pointer; transition:all 0.15s; }
 .tab.active { background:var(--surface2); color:var(--text); border:1px solid var(--border2); }
-
-/* CPL */
 .cpl-good { color:var(--green); font-weight:500; }
 .cpl-ok { color:var(--amber); }
 .cpl-bad { color:var(--red); }
-
-/* EMPTY STATE */
 .empty-state { text-align:center; padding:3rem 0; color:var(--text3); font-size:13px; }
-
 .footer { text-align:center; padding:2rem 0 1rem; font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--text3); letter-spacing:0.06em; }
-
 @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
 .fade { animation:fadeUp 0.4s ease forwards; }
 .fade-1 { animation-delay:0.05s; opacity:0; }
 .fade-2 { animation-delay:0.1s; opacity:0; }
 .fade-3 { animation-delay:0.15s; opacity:0; }
 .fade-4 { animation-delay:0.2s; opacity:0; }
-
-
-
 @media(max-width:900px) {
-  .metrics-grid { grid-template-columns:repeat(2,1fr); }
-  .row-2-1,.row-2 { grid-template-columns:1fr; }
-  .main { padding:1rem; }
-  .topbar { padding:0 1rem; }
-  .date-bar { padding:10px 1rem; top:64px; }
+.metrics-grid { grid-template-columns:repeat(2,1fr); }
+.row-2-1,.row-2 { grid-template-columns:1fr; }
+.main { padding:1rem; }
+.topbar { padding:0 1rem; }
+.date-bar { padding:10px 1rem; top:64px; }
 }
 </style>
 </head>
 <body>
-
 <!-- TOPBAR -->
 <div class="topbar">
-  <div class="brand">
-    <div class="logo">X</div>
-    <div>
-      <div class="brand-name">Katie Camplen</div>
-      <div class="brand-sub">Meta Ads Performance Report</div>
-    </div>
-  </div>
-  <div class="topbar-right">
-    <div class="preset-btns">
-      <button class="preset-btn" onclick="applyPreset('7d', this)">7D</button>
-      <button class="preset-btn" onclick="applyPreset('30d', this)">30D</button>
-      <button class="preset-btn active" onclick="applyPreset('lastMonth', this)">Last month</button>
-      <button class="preset-btn" onclick="applyPreset('90d', this)">90D</button>
-      <button class="preset-btn" onclick="applyPreset('all', this)">All time</button>
-    </div>
-    <div class="date-divider"></div>
-    <div class="custom-dates">
-      <input type="date" class="date-input" id="dateFrom" />
-      <span class="date-sep">&#8594;</span>
-      <input type="date" class="date-input" id="dateTo" />
-      <button class="apply-btn" onclick="applyCustomDate()">Apply</button>
-    </div>
-    <div class="date-divider"></div>
-    <button class="refresh-btn" id="refreshBtn" onclick="loadAllData()">&#8635; Refresh</button>
-  </div>
+<div class="brand">
+<div class="logo">X</div>
+<div>
+<div class="brand-name">Katie Camplen</div>
+<div class="brand-sub">Meta Ads Performance Report</div>
+</div>
+</div>
+<div class="topbar-right">
+<div class="preset-btns">
+<button class="preset-btn" onclick="applyPreset('7d', this)">7D</button>
+<button class="preset-btn" onclick="applyPreset('30d', this)">30D</button>
+<button class="preset-btn active" onclick="applyPreset('lastMonth', this)">Last month</button>
+<button class="preset-btn" onclick="applyPreset('90d', this)">90D</button>
+<button class="preset-btn" onclick="applyPreset('all', this)">All time</button>
+</div>
+<div class="date-divider"></div>
+<div class="custom-dates">
+<input type="date" class="date-input" id="dateFrom" />
+<span class="date-sep">&#8594;</span>
+<input type="date" class="date-input" id="dateTo" />
+<button class="apply-btn" onclick="applyCustomDate()">Apply</button>
+</div>
+<div class="date-divider"></div>
+<button class="refresh-btn" id="refreshBtn" onclick="loadAllData()">&#8635; Refresh</button>
+</div>
 </div>
 
 <!-- STATUS -->
 <div class="status-wrap">
-  <div class="status-bar loading" id="statusBar">
-    <div class="status-dot"></div>
-    <span id="statusText">Connecting to data source...</span>
-  </div>
+<div class="status-bar loading" id="statusBar">
+<div class="status-dot"></div>
+<span id="statusText">Connecting to data source...</span>
+</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
+<!-- ACTIVE RANGE -->
+<div class="active-range" id="activeRange">
+Showing: <span id="activeRangeText">Loading...</span>
+</div>
 
-  <!-- ACTIVE RANGE -->
-  <div class="active-range" id="activeRange">
-    Showing: <span id="activeRangeText">Loading...</span>
-  </div>
+<!-- METRICS -->
+<div class="section-label">Overview</div>
+<div class="metrics-grid fade fade-1">
+<div class="metric-card green">
+<div class="metric-tag">Total spend</div>
+<div class="metric-num" id="mSpend">—</div>
+<div class="metric-sub">USD · campaign total</div>
+</div>
+<div class="metric-card green">
+<div class="metric-tag">Total leads</div>
+<div class="metric-num" id="mLeads">—</div>
+<div class="metric-sub">Lead generation objective</div>
+</div>
+<div class="metric-card">
+<div class="metric-tag">Cost per lead</div>
+<div class="metric-num" id="mCPL">—</div>
+<div class="metric-sub">Average across period</div>
+<div class="metric-badge badge-green" id="mCPLBadge"></div>
+</div>
+<div class="metric-card amber">
+<div class="metric-tag">Avg CTR</div>
+<div class="metric-num" id="mCTR">—</div>
+<div class="metric-sub">Click-through rate</div>
+</div>
+<div class="metric-card">
+<div class="metric-tag">Impressions</div>
+<div class="metric-num" id="mImpr">—</div>
+<div class="metric-sub" id="mReach">Unique reach: —</div>
+</div>
+<div class="metric-card">
+<div class="metric-tag">Total clicks</div>
+<div class="metric-num" id="mClicks">—</div>
+<div class="metric-sub" id="mCPC">Avg CPC: —</div>
+</div>
+<div class="metric-card">
+<div class="metric-tag">Avg CPM</div>
+<div class="metric-num" id="mCPM">—</div>
+<div class="metric-sub">Per 1,000 impressions</div>
+</div>
+<div class="metric-card pink">
+<div class="metric-tag">Avg frequency</div>
+<div class="metric-num" id="mFreq">—</div>
+<div class="metric-sub">Times seen per person</div>
+</div>
+</div>
 
-  <!-- METRICS -->
-  <div class="section-label">Overview</div>
-  <div class="metrics-grid fade fade-1">
-    <div class="metric-card green">
-      <div class="metric-tag">Total spend</div>
-      <div class="metric-num" id="mSpend">—</div>
-      <div class="metric-sub">USD · campaign total</div>
-    </div>
-    <div class="metric-card green">
-      <div class="metric-tag">Total leads</div>
-      <div class="metric-num" id="mLeads">—</div>
-      <div class="metric-sub">Lead generation objective</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-tag">Cost per lead</div>
-      <div class="metric-num" id="mCPL">—</div>
-      <div class="metric-sub">Average across period</div>
-      <div class="metric-badge badge-green" id="mCPLBadge"></div>
-    </div>
-    <div class="metric-card amber">
-      <div class="metric-tag">Avg CTR</div>
-      <div class="metric-num" id="mCTR">—</div>
-      <div class="metric-sub">Click-through rate</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-tag">Impressions</div>
-      <div class="metric-num" id="mImpr">—</div>
-      <div class="metric-sub" id="mReach">Unique reach: —</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-tag">Total clicks</div>
-      <div class="metric-num" id="mClicks">—</div>
-      <div class="metric-sub" id="mCPC">Avg CPC: —</div>
-    </div>
-    <div class="metric-card">
-      <div class="metric-tag">Avg CPM</div>
-      <div class="metric-num" id="mCPM">—</div>
-      <div class="metric-sub">Per 1,000 impressions</div>
-    </div>
-    <div class="metric-card pink">
-      <div class="metric-tag">Avg frequency</div>
-      <div class="metric-num" id="mFreq">—</div>
-      <div class="metric-sub">Times seen per person</div>
-    </div>
-  </div>
+<!-- CHARTS -->
+<div class="section-label">Performance trends</div>
+<div class="row-2-1 fade fade-2">
+<div class="card">
+<div class="card-header">
+<div class="card-title">Daily spend vs leads</div>
+<div class="chart-legend">
+<div class="legend-item"><div class="legend-sq" style="background:#6C63FF;"></div>Spend</div>
+<div class="legend-item"><div class="legend-sq" style="background:#00D4A0;"></div>Leads</div>
+</div>
+</div>
+<div style="position:relative;width:100%;height:280px;">
+<canvas id="spendLeadsChart"></canvas>
+</div>
+</div>
+<div class="card">
+<div class="card-header">
+<div class="card-title">Best days by CPL</div>
+<div class="card-hint">lowest cost</div>
+</div>
+<div id="bestDaysTable"></div>
+</div>
+</div>
 
-  <!-- CHARTS -->
-  <div class="section-label">Performance trends</div>
-  <div class="row-2-1 fade fade-2">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Daily spend vs leads</div>
-        <div class="chart-legend">
-          <div class="legend-item"><div class="legend-sq" style="background:#6C63FF;"></div>Spend</div>
-          <div class="legend-item"><div class="legend-sq" style="background:#00D4A0;"></div>Leads</div>
-        </div>
-      </div>
-      <div style="position:relative;width:100%;height:280px;">
-        <canvas id="spendLeadsChart"></canvas>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Best days by CPL</div>
-        <div class="card-hint">lowest cost</div>
-      </div>
-      <div id="bestDaysTable"></div>
-    </div>
-  </div>
+<div class="row-2 fade fade-3">
+<div class="card">
+<div class="card-header">
+<div class="card-title">CTR trend</div>
+<div class="card-hint">click-through rate %</div>
+</div>
+<div style="position:relative;width:100%;height:180px;">
+<canvas id="ctrChart"></canvas>
+</div>
+</div>
+<div class="card">
+<div class="card-header">
+<div class="card-title">CPC trend</div>
+<div class="card-hint">cost per click USD</div>
+</div>
+<div style="position:relative;width:100%;height:180px;">
+<canvas id="cpcChart"></canvas>
+</div>
+</div>
+</div>
 
-  <div class="row-2 fade fade-3">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">CTR trend</div>
-        <div class="card-hint">click-through rate %</div>
-      </div>
-      <div style="position:relative;width:100%;height:180px;">
-        <canvas id="ctrChart"></canvas>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">CPC trend</div>
-        <div class="card-hint">cost per click USD</div>
-      </div>
-      <div style="position:relative;width:100%;height:180px;">
-        <canvas id="cpcChart"></canvas>
-      </div>
-    </div>
-  </div>
+<!-- BREAKDOWN -->
+<div class="section-label">Breakdown</div>
+<div class="row-2 fade fade-4">
+<div class="card">
+<div class="card-header">
+<div class="card-title">Weekly summary</div>
+<div class="card-hint">by week</div>
+</div>
+<div id="weeklyTable"></div>
+</div>
+<div class="card">
+<div class="card-header">
+<div class="card-title">Ad set performance</div>
+<div class="card-hint">aggregated totals</div>
+</div>
+<div id="adsetTable"></div>
+</div>
+</div>
 
-  <!-- BREAKDOWN -->
-  <div class="section-label">Breakdown</div>
-  <div class="row-2 fade fade-4">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Weekly summary</div>
-        <div class="card-hint">by week</div>
-      </div>
-      <div id="weeklyTable"></div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <div class="card-title">Ad set performance</div>
-        <div class="card-hint">aggregated totals</div>
-      </div>
-      <div id="adsetTable"></div>
-    </div>
-  </div>
+<!-- ADS -->
+<div class="section-label">Creative performance</div>
+<div class="card fade fade-4" style="margin-bottom:1.5rem;">
+<div class="card-header">
+<div class="card-title">Ad level breakdown</div>
+<div class="tab-row">
+<button class="tab active" onclick="filterAds('all',this)">All ads</button>
+<button class="tab" onclick="filterAds('best',this)">Best CPL</button>
+<button class="tab" onclick="filterAds('worst',this)">Worst CPL</button>
+</div>
+</div>
+<div style="overflow-x:auto;">
+<table class="tbl">
+<thead>
+<tr>
+<th>Ad name</th><th>Ad set</th><th>Spend</th><th>Impr.</th>
+<th>Clicks</th><th>CTR</th><th>Leads</th><th>CPL</th><th>Status</th>
+</tr>
+</thead>
+<tbody id="adsTableBody">
+<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:2rem;">Loading...</td></tr>
+</tbody>
+</table>
+</div>
+</div>
 
-  <!-- ADS -->
-  <div class="section-label">Creative performance</div>
-  <div class="card fade fade-4" style="margin-bottom:1.5rem;">
-    <div class="card-header">
-      <div class="card-title">Ad level breakdown</div>
-      <div class="tab-row">
-        <button class="tab active" onclick="filterAds('all',this)">All ads</button>
-        <button class="tab" onclick="filterAds('best',this)">Best CPL</button>
-        <button class="tab" onclick="filterAds('worst',this)">Worst CPL</button>
-      </div>
-    </div>
-    <div style="overflow-x:auto;">
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th>Ad name</th><th>Ad set</th><th>Spend</th><th>Impr.</th>
-            <th>Clicks</th><th>CTR</th><th>Leads</th><th>CPL</th><th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="adsTableBody">
-          <tr><td colspan="9" style="text-align:center;color:var(--text3);padding:2rem;">Loading...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="footer">XAVVI DIGITAL · KATIE CAMPLEN META ADS · DATA AUTO-REFRESHES DAILY VIA GOOGLE SHEETS</div>
+<div class="footer">XAVVI DIGITAL · KATIE CAMPLEN META ADS · DATA AUTO-REFRESHES DAILY VIA GOOGLE SHEETS</div>
 </div>
 
 <script>
@@ -426,7 +325,6 @@ let currentRange = { start: null, end: null };
 
 // ── BOOT ──
 window.addEventListener("DOMContentLoaded", function() {
-  // Set default date inputs to last month
   var r = getPresetRange("lastMonth");
   document.getElementById("dateFrom").value = r.start;
   document.getElementById("dateTo").value = r.end;
@@ -437,7 +335,6 @@ window.addEventListener("DOMContentLoaded", function() {
 async function loadAllData() {
   setStatus("loading", "Fetching latest data...");
   document.getElementById("refreshBtn").classList.add("loading");
-
   try {
     const [campaigns, adsets, ads] = await Promise.all([
       fetchSheet(TABS.campaigns),
@@ -450,7 +347,6 @@ async function loadAllData() {
   } catch(e) {
     setStatus("error", "Error: " + e.message);
   }
-
   document.getElementById("refreshBtn").classList.remove("loading");
 }
 
@@ -471,7 +367,6 @@ function getPresetRange(preset) {
   const today = new Date();
   const fmt = d => d.toISOString().split("T")[0];
   let start, end;
-
   if (preset === "7d") {
     end = fmt(new Date(today.setDate(today.getDate() - 1)));
     today.setDate(today.getDate() - 6);
@@ -495,7 +390,6 @@ function getPresetRange(preset) {
     start = "2000-01-01";
     end = fmt(new Date());
   }
-
   return { start, end };
 }
 
@@ -504,12 +398,10 @@ function applyPreset(preset, btn) {
   document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
   activePreset = preset;
-
   const r = getPresetRange(preset);
   currentRange = r;
   document.getElementById("dateFrom").value = r.start;
   document.getElementById("dateTo").value = r.end;
-
   applyDateFilter();
 }
 
@@ -517,19 +409,50 @@ function applyPreset(preset, btn) {
 function applyCustomDate() {
   const from = document.getElementById("dateFrom").value;
   const to = document.getElementById("dateTo").value;
-
   if (!from || !to) { alert("Please select both start and end dates."); return; }
   if (new Date(from) > new Date(to)) { alert("Start date must be before end date."); return; }
-
-  // Clear preset active state
   document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
   activePreset = "custom";
   currentRange = { start: from, end: to };
-
   applyDateFilter();
 }
 
-// ── FILTER DATA BY DATE RANGE AND RE-RENDER ──
+// ── STRICT DATE PARSER (FIX) ──
+// Replaces bare `new Date(r.Date)`, which silently produces
+// "Invalid Date" for inconsistently formatted sheet values.
+// Invalid Date always fails >= / <= comparisons, so those rows
+// were being dropped from every total with zero warning.
+function parseSheetDate(str) {
+  if (!str) return null;
+
+  // ISO format from Sheets: "YYYY-MM-DD"
+  let m = String(str).trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) {
+    const y = +m[1], mo = +m[2], d = +m[3];
+    return new Date(y, mo - 1, d);
+  }
+
+  // US format fallback: "M/D/YYYY" or "MM/DD/YYYY"
+  m = String(str).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (m) {
+    const mo = +m[1], d = +m[2], y = +m[3];
+    return new Date(y, mo - 1, d);
+  }
+
+  return null; // unrecognized format — caller should skip + warn
+}
+
+// ── ACCURATE DAY COUNT (FIX) ──
+// The old label used filtered.campaigns.length (a row count) as
+// if it were a day count. This computes the real calendar span.
+function daysBetween(startStr, endStr) {
+  const start = new Date(startStr);
+  const end = new Date(endStr);
+  const msPerDay = 1000 * 60 * 60 * 24;
+  return Math.round((end - start) / msPerDay) + 1; // inclusive of both ends
+}
+
+// ── FILTER DATA BY DATE RANGE AND RE-RENDER (FIXED) ──
 function applyDateFilter() {
   if (!currentRange.start) {
     var r = getPresetRange("lastMonth");
@@ -539,26 +462,37 @@ function applyDateFilter() {
   const start = new Date(currentRange.start);
   const end = new Date(currentRange.end);
 
-  // Filter each dataset by date
-  filtered.campaigns = allData.campaigns.filter(r => {
-    const d = new Date(r.Date);
-    return d >= start && d <= end;
-  });
+  let skippedRows = 0;
 
-  filtered.adsets = allData.adsets.filter(r => {
-    const d = new Date(r.Date);
-    return d >= start && d <= end;
-  });
+  function filterByDate(rows) {
+    return rows.filter(r => {
+      const d = parseSheetDate(r.Date);
+      if (!d) {
+        skippedRows++;
+        console.warn("Skipping row with unparseable date:", r.Date, r);
+        return false;
+      }
+      return d >= start && d <= end;
+    });
+  }
 
-  filtered.ads = allData.ads.filter(r => {
-    const d = new Date(r.Date);
-    return d >= start && d <= end;
-  });
+  filtered.campaigns = filterByDate(allData.campaigns);
+  filtered.adsets    = filterByDate(allData.adsets);
+  filtered.ads        = filterByDate(allData.ads);
 
-  // Update active range label
-  document.getElementById("activeRangeText").textContent =
-    fmtDateLong(currentRange.start) + " — " + fmtDateLong(currentRange.end) +
-    " (" + filtered.campaigns.length + " days)";
+  if (skippedRows > 0) {
+    console.warn(`${skippedRows} row(s) skipped due to bad date formatting. Check the "Date" column in the Google Sheet for inconsistent formats.`);
+  }
+
+  // Active range label now shows the REAL day count, not a row
+  // count, and flags it if fewer days of data actually exist.
+  const expectedDays = daysBetween(currentRange.start, currentRange.end);
+  const actualDays = new Set(filtered.campaigns.map(r => r.Date)).size;
+  const rangeLabel = fmtDateLong(currentRange.start) + " — " + fmtDateLong(currentRange.end) +
+    " (" + expectedDays + " days" +
+    (actualDays < expectedDays ? `, data for ${actualDays}` : "") + ")";
+
+  document.getElementById("activeRangeText").textContent = rangeLabel;
 
   // Re-render everything with filtered data
   updateMetrics(filtered.campaigns);
@@ -618,7 +552,6 @@ function renderSpendLeads(d) {
     }
   });
 }
-
 function renderCTR(d) {
   const s=[...d].sort((a,b)=>new Date(a.Date)-new Date(b.Date));
   if(charts.ctr) charts.ctr.destroy();
@@ -631,7 +564,6 @@ function renderCTR(d) {
     }
   });
 }
-
 function renderCPC(d) {
   const s=[...d].sort((a,b)=>new Date(a.Date)-new Date(b.Date));
   if(charts.cpc) charts.cpc.destroy();
@@ -653,10 +585,8 @@ function renderWeekly(d) {
     const dt = new Date(r.Date);
     const yr = dt.getFullYear();
     const mo = dt.getMonth();
-    // Week number within month based on day of month
     const day = dt.getDate();
     const wn = day<=7 ? 1 : day<=14 ? 2 : day<=21 ? 3 : day<=28 ? 4 : 5;
-    // Build a truly unique key: year + month + weeknum combined as single number
     const sortKey = yr * 100000 + mo * 100 + wn;
     const moName = dt.toLocaleDateString("en-US",{month:"short"});
     const label = moName + " W" + wn;
